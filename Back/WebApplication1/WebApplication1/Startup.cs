@@ -11,13 +11,15 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using WebApplication1.Data;
 using StackExchange.Redis;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using MongoDB.Driver;
+using ServerVersion = Microsoft.EntityFrameworkCore.ServerVersion;
 
 namespace dotnet_chat
 {
-
     public class Startup
     {
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -27,13 +29,16 @@ namespace dotnet_chat
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Redis Setup
+            //=======================================================================MongoDB setup=====================================================================
+            var mongoClient = new MongoClient("mongodb://alex:alex@10.30.0.2:27017");
+            var database = mongoClient.GetDatabase("ChatTable"); // Replace with your actual database name
+            services.AddSingleton(database);
+            //=======================================================================Redis Setup=====================================================================
             string redisConnection = Configuration.GetConnectionString("Redis");
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = redisConnection;
             });
-
             var redisConfiguration = ConfigurationOptions.Parse("10.30.0.2:9537,password=Alex");
             IConnectionMultiplexer redis = null;
             try
@@ -45,20 +50,34 @@ namespace dotnet_chat
             {
                 Console.WriteLine($"Redis Connection Error: {ex.Message}");
             }
-
-            // MySQL DbContext Setup
+            //=======================================================================MySQL DbContext Setup=====================================================================
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 string connectionString = Configuration.GetConnectionString("DefaultConnection");
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             });
-
-            // Adding other services
+            //=======================================================================Adding JWT Authentication=====================================================================
+            services.AddAuthentication("Bearer")
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    };
+                });
+            //=======================================================================Adding other services=====================================================================
             services.AddCors();
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
         }
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -72,6 +91,10 @@ namespace dotnet_chat
             app.UseHttpsRedirection();
             app.UseRouting();
 
+           
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseCors(options => options
                 .WithOrigins(
                     new string[]
@@ -83,8 +106,10 @@ namespace dotnet_chat
                 .AllowAnyMethod()
             );
 
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
