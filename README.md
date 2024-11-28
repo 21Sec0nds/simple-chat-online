@@ -99,18 +99,21 @@
 
 
 
-
 > [!IMPORTANT]
 > <h2>Packages needed</h2>
->
-> - **Microsoft.EntityFrameworkCore**
-> - **Microsoft.Extensions.Caching.StackExchangeRedis**
-> - **Newtonsoft.Json**
-> - **Pomelo.EntityFrameworkCore.MySql**
-> - **PusherServer**
-> - **StackExchange.Redis**
-> - **Swashbuckle.AspNetCore**
-> - **Microsoft.EntityFrameworkCore.Tools**
+
+- **Microsoft.EntityFrameworkCore**  ```V:8.0.7```
+- **Microsoft.EntityFrameworkCore.Tools** ```V:8.0.7```
+- **Microsoft.AspNetCore.Authentication.JwtBearer** ```V:8.0.0```
+- **Microsoft.Extensions.Caching.StackExchangeRedis** ```V:9.0.0```
+- **StackExchange.Redis** ```V:2.8.16```
+- **System.IdentityModel.Tokens.Jwt** ```V:8.2.1```
+- **Pomelo.EntityFrameworkCore.MySql** ```V:8.0.2```
+- **MongoDB.Driver** ```V:3.0.0```
+- **Swashbuckle.AspNetCore** ```V:7.0.0```
+- **Newtonsoft.Json** ```V:13.0.3```
+- **PusherServer** ```V:5.0.0```
+
 
 ---
 
@@ -119,6 +122,23 @@
 
 ---
 
+
+> [!TIP]
+> I've always had my own abbreviations that are easier for me to use to mark something. I'll include the meaning for each abbreviation I've used here.
+> 
+> 1.**Ss** - Snapshot State
+> 
+> 2.**W** - Worknig
+>
+> 3.**Wn** - Not working
+>
+> 4.**fF** - Full functionality
+>
+> 5.**Ctd** - Completed
+>
+> 6.**CtdF** - Full completed
+
+---
 > [!NOTE]
 > If you see this, it means the project is still in development, so it will receive updates in the future.Or I just forgot to delete it.
 
