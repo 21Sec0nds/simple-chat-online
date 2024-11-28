@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MongoDB.Driver;
 using ServerVersion = Microsoft.EntityFrameworkCore.ServerVersion;
+using WebApplication1.hash;
 
 namespace dotnet_chat
 {
@@ -56,7 +57,7 @@ namespace dotnet_chat
                 string connectionString = Configuration.GetConnectionString("DefaultConnection");
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             });
-            //=======================================================================Adding JWT Authentication=====================================================================
+            //=======================================================================Adding JWT Authentication====================================================================
             services.AddAuthentication("Bearer")
                 .AddJwtBearer(options =>
                 {
@@ -76,6 +77,7 @@ namespace dotnet_chat
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+            services.AddScoped<TokenGeneration>();
         }
 
 

@@ -2,57 +2,62 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WebApplication1.dtos;
+using static System.Net.WebRequestMethods;
 
 namespace WebApplication1.hash
 {
     public class TokenGeneration
     {
-        public string GenerateToken(Guid userId, string email)
+        private const string Key = "YourSuperSecureLongKeyOfAtLeast32Characters";
+
+        public string GenerateToken(int userId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = "IdkWhatExactlyUTrynaReadHere"; 
 
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(JwtRegisteredClaimNames.Sub, userId.ToString()), 
-                new(ClaimTypes.Email, email)  
+                new(JwtRegisteredClaimNames.Sub, userId.ToString())
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(60),
-                Issuer = "https://id.domentrain.com",
-                Audience = "https://dometran.com",
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256Signature)
+                Expires = DateTime.Now.AddMinutes(60),
+                Issuer = "http://localhost:4200",
+                Audience = "http://localhost:4200",
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key)),
+                    SecurityAlgorithms.HmacSha256Signature
+                )
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
 
-     
-        public Guid DecodeToken(string token)
+        public int DecodeToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = "IdkWhatExactlyUTrynaReadHere"; 
 
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ValidateLifetime = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key))
             };
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+            var principal = tokenHandler.ValidateToken(token, validationParameters, out var _);
             var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub);
             if (userIdClaim != null)
             {
-                return Guid.Parse(userIdClaim.Value); 
+                return int.Parse(userIdClaim.Value);
             }
-            return Guid.Empty;
+
+            throw new SecurityTokenException("Invalid token: no userId found");
         }
+
+
     }
 }

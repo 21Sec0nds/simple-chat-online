@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
-import { Route, Router } from '@angular/router';
-import { ValidatorService } from '../validators/validators.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth-page',
@@ -11,33 +10,34 @@ import { ValidatorService } from '../validators/validators.service';
 export class AuthPageComponent {
   loginForm: FormGroup;
 
-  constructor(private authService: AuthService,
+  constructor(
+    private authService: AuthService,
     private fb: FormBuilder,
-    private validatorService: ValidatorService,
-    private router: Router ) {
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
-  // validation when touched
+  // Check if the form field is invalid after being touched
   isFieldInvalid(field: string): boolean {
     return !!this.loginForm.controls[field].errors && this.loginForm.controls[field].touched;
   }
 
   onSubmit() {
     if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched(); // mark as touched for error
+      this.loginForm.markAllAsTouched(); // Mark all fields as touched to show validation errors
       return;
     }
 
     const { username, password } = this.loginForm.value;
-    this.authService.AddUser(username, password).subscribe(isLoggedIn => {
+    this.authService.loginUser(username, password).subscribe(isLoggedIn => {
       if (isLoggedIn) {
-        this.router.navigate(['/chat']);
+        this.router.navigate(['/chat']); // Redirect to chat if login is successful
       } else {
-        console.log('Invalid login credentials');
+        console.log('Invalid login credentials'); // Handle failed login attempt
       }
     });
   }

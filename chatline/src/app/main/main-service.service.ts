@@ -14,7 +14,7 @@ export class MainServiceService {
 
   constructor(private http: HttpClient) {}
 
-  //take the current user
+  // Get the current user from local storage or the current instance
   getCurrentUser(): User | null {
     if (!this.currentUser) {
       const storedUser = localStorage.getItem('currentUser');
@@ -25,32 +25,31 @@ export class MainServiceService {
     return this.currentUser;
   }
 
-
-  //set new user
+  // Set a new user in local storage and the current instance
   setCurrentUser(user: User): void {
     this.currentUser = user;
     localStorage.setItem('currentUser', JSON.stringify(user));
   }
 
-  //get user name
+  // Get username of the current user
   getUsername(): string {
     const user = this.getCurrentUser();
     return user ? user.nickName : '';
   }
 
-  //get user img
-  getImgUser(): string{
-    const img = this.getCurrentUser();
-    return img ? img.avatarUrl : '';
+  // Get avatar URL of the current user
+  getImgUser(): string {
+    const user = this.getCurrentUser();
+    return user ? user.avatarUrl : '';
   }
 
-  //Clear user from localStorage
+  // Clear the user from local storage
   clearCurrentUser(): void {
     this.currentUser = null;
     localStorage.removeItem('currentUser');
   }
 
-  //checkevery time if user still the same, if not replace with new one
+  // Check and update user information
   checkAndUpdateUser(user: User): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/getuser/${user.id}`).pipe(
       map(existingUser => {
@@ -66,13 +65,14 @@ export class MainServiceService {
       })
     );
   }
-  //Same but for img
+
+  // Check and update user avatar
   checkAndUpdateUserImg(user: User): Observable<User> {
     return this.http.get<string>(`${this.baseUrl}/getimg/${user.id}`, { responseType: 'text' as 'json' }).pipe(
       map((existingImgUrl: string) => {
         if (existingImgUrl && existingImgUrl !== user.avatarUrl) {
           user.avatarUrl = existingImgUrl;
-          this.setCurrentUser(user); // Update the current user with the new avatar
+          this.setCurrentUser(user);
         }
         return user;
       }),
@@ -83,7 +83,7 @@ export class MainServiceService {
     );
   }
 
-  //update user
+  // Update user information
   updateUser(user: User): Observable<User> {
     return this.http.put<User>(`${this.baseUrl}/update/${user.id}`, user).pipe(
       map((updatedUser) => {
@@ -97,7 +97,7 @@ export class MainServiceService {
     );
   }
 
-  //Delete user
+  // Delete user
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/delete/${userId}`).pipe(
       catchError((error) => {
@@ -107,12 +107,12 @@ export class MainServiceService {
     );
   }
 
-  //Take user avatar
+  // Get avatar URL of the user
   getAvatarUrl(userId: number): Observable<string> {
     return this.http.get<string>(`${this.baseUrl}/getimg/${userId}`, { responseType: 'text' as 'json' });
   }
 
-  
+  // Login user
   loginUser(email: string, password: string): Observable<User> {
     return this.http.post<User>(`${this.baseUrl}/login`, { email, password }).pipe(
       map((user) => {
@@ -126,6 +126,7 @@ export class MainServiceService {
     );
   }
 
+  // Register new user
   registerUser(user: User): Observable<User> {
     return this.http.post<User>(`${this.baseUrl}/register`, user).pipe(
       map((newUser) => {

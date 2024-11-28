@@ -1,13 +1,15 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { MainServiceService } from '../main-service.service';
-import { environments } from '../../environments/environmets';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environments } from '../../environments/environmets';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
-  styles: ``
+  styles: [`
+    /* Add your styles here */
+  `]
 })
 export class ProfileComponent implements OnInit {
   currentname: string = '';
@@ -40,9 +42,9 @@ export class ProfileComponent implements OnInit {
     const user = this.service.getCurrentUser();
     if (user && user.id !== undefined) {
       this.service.getAvatarUrl(user.id).subscribe(
-        (url: string) => { // url will be a string (the image URL)
+        (url: string) => {
           console.log('Avatar URL:', url);
-          this.userImageUrl = url;  // Set the avatar URL
+          this.userImageUrl = url;
         },
         (error) => {
           console.error('Error fetching avatar URL:', error);
@@ -52,7 +54,6 @@ export class ProfileComponent implements OnInit {
       console.error('User ID is undefined or user is not set');
     }
   }
-
 
   // Submit the new username
   submit(): void {
@@ -113,7 +114,7 @@ export class ProfileComponent implements OnInit {
       }
     }
   }
-  
+
   updateImageUrl(): void {
     if (this.tempImageUrl.trim()) {
       this.userImageUrl = this.tempImageUrl;
